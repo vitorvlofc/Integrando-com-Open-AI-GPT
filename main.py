@@ -7,21 +7,23 @@ load_dotenv()
 # Instancia o cliente da OpenAI. Ele busca automaticamente pela variável OPENAI_API_KEY no ambiente
 client = OpenAI()
 
-# Faz a requisição ativando o modo streaming e definindo mensagens com papéis (system e user)
+# Faz a requisição em streaming configurando diretrizes, controle de tamanho e criatividade
 stream = client.chat.completions.create(
     model="gpt-3.5-turbo",  # Especifica o modelo a ser utilizado
     messages=[
-        # Define a persona/comportamento base do assistente
-        {"role": "system", "content": "Vocé é um assistente especialista em base de programação em python explicativa de forma clara é simples."},
-        # Define a pergunta/solicitação do usuário
-        {"role": "user", "content": "me explica um pouco sobre a função print() do python. e me mostre um exemplo basico de logica de programação"},
+        # Define a instrução de sistema que limita o papel da IA a tradutor de texto
+        {"role": "system", "content": "Vocé será um tradutor de texto para português."},
+        # Envia o texto fornecido pelo usuário a ser processado
+        {"role": "user", "content": "meu nome é vitor"},
     ],
-    stream=True,  # Habilita a transmissão progressiva da resposta em tempo real
+    stream=True,         # Habilita o envio progressivo da resposta em tempo real
+    max_tokens=200,      # Limita o tamanho máximo da resposta gerada a 200 tokens
+    temperature=0.2,     # Define baixa variabilidade/criatividade (respostas mais diretas e precisas)
 )
 
 # Percorre cada fragmento (chunk) recebido do fluxo de resposta
 for chunk in stream:
-    # Garante que o fragmento possui texto antes de tentar imprimir (evita None)
+    # Verifica se o fragmento atual possui conteúdo de texto válido
     if chunk.choices[0].delta.content is not None:
-        # Exibe o texto recebido mantendo o fluxo contínuo na mesma linha do terminal
+        # Exibe o texto recebido de forma contínua no terminal
         print(chunk.choices[0].delta.content, end='')
