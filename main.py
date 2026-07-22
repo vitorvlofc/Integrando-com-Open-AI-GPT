@@ -7,18 +7,21 @@ load_dotenv()
 # Instancia o cliente da OpenAI. Ele busca automaticamente pela variável OPENAI_API_KEY no ambiente
 client = OpenAI()
 
-# Faz a requisição ativando o modo streaming (resposta gerada em pedaços em tempo real)
+# Faz a requisição ativando o modo streaming e definindo mensagens com papéis (system e user)
 stream = client.chat.completions.create(
     model="gpt-3.5-turbo",  # Especifica o modelo a ser utilizado
     messages=[
-        {"role": "user", "content": "Oque é mais perguntado no chat gpt todo dia."},  # Mensagem enviada pelo usuário
+        # Define a persona/comportamento base do assistente
+        {"role": "system", "content": "Vocé é um assistente especialista em base de programação em python explicativa de forma clara é simples."},
+        # Define a pergunta/solicitação do usuário
+        {"role": "user", "content": "me explica um pouco sobre a função print() do python. e me mostre um exemplo basico de logica de programação"},
     ],
-    stream=True,  # Habilita o envio progressivo (stream) da resposta
+    stream=True,  # Habilita a transmissão progressiva da resposta em tempo real
 )
 
-# Percorre cada pedaço (chunk) da resposta à medida que ele chega da API
+# Percorre cada fragmento (chunk) recebido do fluxo de resposta
 for chunk in stream:
-    # Verifica se o pedaço atual contém texto válido (ignora pedaços vazios ou de controle)
+    # Garante que o fragmento possui texto antes de tentar imprimir (evita None)
     if chunk.choices[0].delta.content is not None:
-        # Imprime o texto do pedaço sem quebra de linha (end='') para formar o texto contínuo no terminal
+        # Exibe o texto recebido mantendo o fluxo contínuo na mesma linha do terminal
         print(chunk.choices[0].delta.content, end='')
